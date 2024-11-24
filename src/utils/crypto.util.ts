@@ -7,7 +7,6 @@ import logger from "./logger";
 
 interface KeyPair {
   publicKey: string;
-  privateKey: string;
 }
 
 export class CryptoUtil {
@@ -31,9 +30,7 @@ export class CryptoUtil {
 
       const publicKey = await fs.promises.readFile(path.join(keysDir, "public.pem"), "utf8");
 
-      const privateKey = await fs.promises.readFile(path.join(keysDir, "private.pem"), "utf8");
-
-      this.keyPair = { publicKey, privateKey };
+      this.keyPair = { publicKey };
       return this.keyPair;
     } catch (error) {
       logger.error("Error loading keys:", error);
@@ -46,12 +43,5 @@ export class CryptoUtil {
       throw new Error(ErrorTypeEnum.enum.INTERNAL_SERVER_ERROR);
     }
     return this.keyPair.publicKey;
-  }
-
-  getPrivateKey(): string {
-    if (this.keyPair?.privateKey === null || this.keyPair?.privateKey === undefined) {
-      throw new Error(ErrorTypeEnum.enum.INTERNAL_SERVER_ERROR);
-    }
-    return this.keyPair.privateKey;
   }
 }
