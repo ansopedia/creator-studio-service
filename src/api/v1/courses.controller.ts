@@ -5,6 +5,7 @@ import { sendResponse } from "@/utils";
 
 import { COURSE_MESSAGES } from "./courses.constants";
 import { CourseService } from "./courses.services";
+import { validateCourseFilter } from "./courses.validation";
 
 export const createCourse = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -88,6 +89,22 @@ export const restoreCourse = async (req: Request, res: Response, next: NextFunct
       statusCode: STATUS_CODES.OK,
       message: COURSE_MESSAGES.COURSE_RESTORED,
       data: { course },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const filterCourses = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filterOptions = validateCourseFilter(req.query);
+    const result = await CourseService.filterCourses(filterOptions);
+
+    sendResponse({
+      response: res,
+      statusCode: STATUS_CODES.OK,
+      message: COURSE_MESSAGES.COURSES_FETCHED,
+      data: result,
     });
   } catch (error) {
     next(error);

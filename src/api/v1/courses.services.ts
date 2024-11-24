@@ -2,7 +2,7 @@ import { ErrorTypeEnum } from "@/constants";
 import { validateObjectId } from "@/utils";
 
 import { CourseDAL } from "./courses.dal";
-import { CreateCourse, validateCourse } from "./courses.validation";
+import { CourseFilterRequest, CreateCourse, validateCourse } from "./courses.validation";
 
 export class CourseService {
   static async createCourse(courseData: CreateCourse) {
@@ -51,5 +51,16 @@ export class CourseService {
       throw new Error(ErrorTypeEnum.enum.RESOURCE_NOT_FOUND);
     }
     return course;
+  }
+
+  static async filterCourses(filterOptions: CourseFilterRequest) {
+    const validatedOptions = {
+      ...filterOptions,
+      page: Math.max(1, filterOptions.page ?? 1),
+      limit: Math.min(50, Math.max(1, filterOptions.limit ?? 10)),
+    };
+
+    const result = await CourseDAL.filterCourses(validatedOptions);
+    return result;
   }
 }

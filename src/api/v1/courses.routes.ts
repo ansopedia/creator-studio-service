@@ -5,6 +5,7 @@ import { checkPermission, validateAccessToken } from "@/middlewares";
 
 import {
   createCourse,
+  filterCourses,
   getAllCourses,
   getCourseById,
   restoreCourse,
@@ -16,6 +17,7 @@ const router = Router();
 
 router.post("/courses", validateAccessToken, checkPermission([PERMISSIONS.CREATE_COURSE]), createCourse);
 router.get("/courses", getAllCourses);
+router.get("/courses/filter", filterCourses);
 router.get("/courses/:courseId", getCourseById);
 router.delete(
   "/courses/:courseId",

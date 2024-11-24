@@ -1,10 +1,8 @@
 import { z } from "zod";
 
-import { objectIdSchema } from "../../utils";
-
 // Course Schema
 export const courseSchema = z.object({
-  id: objectIdSchema,
+  id: z.string().uuid(),
   authorId: z.string().min(1, "Author is required"),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required").optional(),
@@ -82,3 +80,96 @@ export const validateCourse = (data: unknown) => {
 export const validateFilterState = (data: unknown) => {
   return filterStateSchema.parse(data);
 };
+
+// API Request Format
+export type CourseFilterRequest = {
+  searchQuery?: string;
+  categories: string[];
+  levels: string[];
+  priceRange?: [number, number];
+  duration: string[];
+  sortBy?: "newest" | "popular" | "price-low" | "price-high" | "rating";
+  page?: number;
+  limit?: number;
+};
+
+export const courseFilterRequestSchema = z.object({
+  searchQuery: z.string().optional(),
+  categories: z
+    .union([
+      z.array(z.string()),
+      z.string().transform((val) => {
+        try {
+          const parsed = JSON.parse(val);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }),
+    ])
+    .default([]),
+  levels: z
+    .union([
+      z.array(z.string()),
+      z.string().transform((val) => {
+        try {
+          const parsed = JSON.parse(val);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }),
+    ])
+    .default([]),
+  priceRange: z
+    .union([
+      z.tuple([z.number(), z.number()]),
+      z.string().transform((val) => {
+        try {
+          const parsed = JSON.parse(val);
+          return Array.isArray(parsed) && parsed.length === 2
+            ? ([Number(parsed[0]), Number(parsed[1])] as [number, number])
+            : undefined;
+        } catch {
+          return undefined;
+        }
+      }),
+    ])
+    .optional(),
+  duration: z
+    .union([
+      z.array(z.string()),
+      z.string().transform((val) => {
+        try {
+          const parsed = JSON.parse(val);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }),
+    ])
+    .default([]),
+  sortBy: z.enum(["newest", "popular", "price-low", "price-high", "rating"]).optional(),
+  page: z.union([z.number(), z.string().transform((val) => parseInt(val) || undefined)]).optional(),
+  limit: z.union([z.number(), z.string().transform((val) => parseInt(val) || undefined)]).optional(),
+});
+
+export const validateCourseFilter = (data: unknown): CourseFilterRequest => {
+  return courseFilterRequestSchema.parse(data);
+};
+
+// API Response Format
+export interface CourseFilterResponse {
+  courses: Course[];
+  pagination: {
+    total: number;
+    currentPage: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+  filters: {
+    categories: { name: string; count: number }[];
+    levels: { name: string; count: number }[];
+    priceRange: { min: number; max: number };
+  };
+}
