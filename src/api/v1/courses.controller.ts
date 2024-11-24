@@ -1,32 +1,33 @@
 import { NextFunction, Request, Response } from "express";
 
+import { STATUS_CODES } from "@/constants";
 import { sendResponse } from "@/utils";
 
-import { STATUS_CODES } from "../../constants";
 import { COURSE_MESSAGES } from "./courses.constants";
+import { CourseService } from "./courses.services";
 
 export const createCourse = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.body.loggedInUser;
+    const course = await CourseService.createCourse(req.body);
     sendResponse({
       response: res,
       statusCode: STATUS_CODES.CREATED,
       message: COURSE_MESSAGES.COURSE_CREATED,
-      data: { userId },
+      data: { course },
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const getAllCourses = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllCourses = async (_: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.body.loggedInUser;
+    const courses = await CourseService.getAllCourses();
     sendResponse({
       response: res,
       statusCode: STATUS_CODES.OK,
       message: COURSE_MESSAGES.COURSES_FETCHED,
-      data: { userId },
+      data: { courses },
     });
   } catch (error) {
     next(error);
@@ -36,39 +37,12 @@ export const getAllCourses = async (req: Request, res: Response, next: NextFunct
 export const getCourseById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { courseId } = req.params;
+    const course = await CourseService.getCourseById(courseId);
     sendResponse({
       response: res,
       statusCode: STATUS_CODES.OK,
       message: COURSE_MESSAGES.COURSE_FETCHED,
-      data: { courseId },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const softDeleteCourse = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { courseId } = req.params;
-    sendResponse({
-      response: res,
-      statusCode: STATUS_CODES.OK,
-      message: COURSE_MESSAGES.COURSE_DELETED,
-      data: { courseId },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const restoreCourse = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { courseId } = req.params;
-    sendResponse({
-      response: res,
-      statusCode: STATUS_CODES.OK,
-      message: COURSE_MESSAGES.COURSE_RESTORED,
-      data: { courseId },
+      data: { course },
     });
   } catch (error) {
     next(error);
@@ -78,11 +52,42 @@ export const restoreCourse = async (req: Request, res: Response, next: NextFunct
 export const updateCourse = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { courseId } = req.params;
+    const course = await CourseService.updateCourse(courseId, req.body);
     sendResponse({
       response: res,
       statusCode: STATUS_CODES.OK,
       message: COURSE_MESSAGES.COURSE_UPDATED,
-      data: { courseId },
+      data: { course },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const softDeleteCourse = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { courseId } = req.params;
+    const course = await CourseService.softDeleteCourse(courseId);
+    sendResponse({
+      response: res,
+      statusCode: STATUS_CODES.OK,
+      message: COURSE_MESSAGES.COURSE_DELETED,
+      data: { course },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const restoreCourse = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { courseId } = req.params;
+    const course = await CourseService.restoreCourse(courseId);
+    sendResponse({
+      response: res,
+      statusCode: STATUS_CODES.OK,
+      message: COURSE_MESSAGES.COURSE_RESTORED,
+      data: { course },
     });
   } catch (error) {
     next(error);
