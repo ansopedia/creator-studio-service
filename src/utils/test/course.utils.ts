@@ -1,7 +1,7 @@
 import supertest, { Response } from "supertest";
 
-import { app } from "../../app";
-import { Course } from "../../types/courses";
+import { Course } from "@/api/v1/courses.validation";
+import { app } from "@/app";
 
 export const createCourse = async (courseData: Course): Promise<Response> => {
   return supertest(app).post("/api/v1/courses").send(courseData);
